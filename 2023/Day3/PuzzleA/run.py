@@ -7,6 +7,10 @@ characters = {'.': 15297, '7': 386, '8': 365, '5': 356,
               '@': 36, '#': 38}
 
 isNotCharacter = "0123456789."
+isNumber = "0123456789"
+total = 0
+lastOneWasNumber = False
+currentWord = ""
 
 def IsAdjacent(x, y, map):
     isAdjacent = False
@@ -31,13 +35,40 @@ def CountAllCharacters(string):
     print(registry)
 
 def GetCoordinate(x,y, map):
-    if y > len(map) or y < 0:
+    if y > len(map) -1 or y < 0:
         return None
-    if x > len(map[y]) or x < 0:
+    if x > len(map[y]) -1 or x < 0:
         return None
     return map[y][x]
 
-# CountAllCharacters(f.read())
 rows = f.read().split("\n")
-print(IsAdjacent(0, 0, rows))
-# print(rows)
+for row in range(len(rows)):
+    for char in range(len(rows[row])):
+        character = rows[row][char]
+        if character in isNumber:
+            currentWord += f"{character}"
+            lastOneWasNumber = True
+        else:
+            if lastOneWasNumber == True or currentWord != "":
+                lastOneWasNumber = False
+                found = False
+                for length in range(len(currentWord)):
+                    if IsAdjacent(char - length -1, row, rows):
+                        found = True
+                if found == True:
+                    # print(currentWord)
+                    total += int(currentWord)
+                currentWord = ""
+            else:
+                pass
+    if lastOneWasNumber == True or currentWord != "":
+        lastOneWasNumber = False
+        found = False
+        for length in range(len(currentWord)):
+            if IsAdjacent(char - length -1, row, rows):
+                found = True
+        if found == True:
+            total += int(currentWord)
+        currentWord = ""
+
+print(total)
