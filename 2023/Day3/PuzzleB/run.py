@@ -11,6 +11,10 @@ isNumber = "0123456789"
 total = 0
 lastOneWasNumber = False
 currentWord = ""
+multipliers = {}
+isMultiplier = False
+currGearId = 0
+gearIds = {}
 
 def IsAdjacent(x, y, map):
     isAdjacent = False
@@ -23,6 +27,18 @@ def IsAdjacent(x, y, map):
                 isAdjacent = True
     return isAdjacent
 
+def MarkAdjacent(x, y, gearId, map, multipliers):
+    for xi in range(3):
+        for yi in range(3):
+            char = GetCoordinate(xi -1 + x, yi -1 + y, map)
+            if char == None:
+                pass
+            elif f"{char}" in isNumber:
+                multipliers[f"{xi -1 + x}.{yi -1 + y}"] = gearId
+    return multipliers
+
+
+
 def CountAllCharacters(string):
     registry = {}
     for x in range(len(string)):
@@ -32,8 +48,6 @@ def CountAllCharacters(string):
         else:
             registry[char] += 1
 
-    print(registry)
-
 def GetCoordinate(x,y, map):
     if y > len(map) -1 or y < 0:
         return None
@@ -42,12 +56,23 @@ def GetCoordinate(x,y, map):
     return map[y][x]
 
 rows = f.read().split("\n")
+gearId = 0
+for row in range(len(rows)):
+    for char in range(len(rows[row])):
+        character = rows[row][char]
+        if character == "*":
+            multipliers = MarkAdjacent(char, row, gearId, rows, multipliers)
+            gearId+=1
+
 for row in range(len(rows)):
     for char in range(len(rows[row])):
         character = rows[row][char]
         if character in isNumber:
             currentWord += f"{character}"
             lastOneWasNumber = True
+            if f"{char}.{row}" in multipliers:
+                isMultiplier = True
+                currGearId = multipliers[f"{char}.{row}"]
         else:
             if lastOneWasNumber == True or currentWord != "":
                 lastOneWasNumber = False
@@ -55,10 +80,20 @@ for row in range(len(rows)):
                 for length in range(len(currentWord)):
                     if IsAdjacent(char - length -1, row, rows):
                         found = True
-                if found == True:
-                    # print(currentWord)
-                    total += int(currentWord)
+                if isMultiplier:
+                    if currGearId in gearIds:
+                        gearIds[currGearId]["nr2"] = int(currentWord)
+                    else:
+                        gearIds[currGearId] = {
+                            "nr1": int(currentWord),
+                            "nr2": None
+                        }
+                elif found == True:
+                    # total += int(currentWord)
+                    pass
                 currentWord = ""
+                isMultiplier = False
+                currGearId = 0
             else:
                 pass
     if lastOneWasNumber == True or currentWord != "":
@@ -67,8 +102,25 @@ for row in range(len(rows)):
         for length in range(len(currentWord)):
             if IsAdjacent(char - length -1, row, rows):
                 found = True
-        if found == True:
-            total += int(currentWord)
+        if isMultiplier:
+            if currGearId in gearIds:
+                gearIds[currGearId]["nr2"] = int(currentWord)
+            else:
+                gearIds[currGearId] = {
+                    "nr1": int(currentWord),
+                    "nr2": None
+                }
+        elif found == True:
+            # total += int(currentWord)
+            pass
         currentWord = ""
+
+for item in gearIds.keys():
+    # print(gearIds[item])
+    if gearIds[item]["nr2"] == None:
+        # total += gearIds[item]["nr1"]
+        pass
+    else:
+        total += (gearIds[item]["nr1"] * gearIds[item]["nr2"])
 
 print(total)
